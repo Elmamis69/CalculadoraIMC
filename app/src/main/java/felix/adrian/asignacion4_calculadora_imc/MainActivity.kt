@@ -9,60 +9,80 @@ import android.widget.TextView
 
 
 class MainActivity : AppCompatActivity() {
-    //Declaración de las variables
-    var txtResultado: TextView = findViewById(R.id.tvResultado)
-    var txtEstado: TextView = findViewById(R.id.tvEstado)
 
-    //Declaración de los editText
-    val etEstatura: EditText = findViewById(R.id.etEstatura)
-    val etPeso: EditText = findViewById(R.id.etPeso)
-    val btnCalcula: Button = findViewById(R.id.btnCalcular)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-    //Lógica del botón calcula
-    btnCalcula.setOnClickListener {
-            if (!this.etEstatura.text.isBlank() || !this.etPeso.text.isBlank()) {
-                //Se calcula el índice de masa corporal y se ubica el resultado en
-                val imcNum = this.calculaIMC(this.etEstatura.text.toString().toDouble(),
-                    this.etPeso.text.toString().toDouble())
-                this.txtResultado.setText(imcNum.toString())
+        val pesoK: TextView = findViewById(R.id.weight)
+        val alturaE: TextView = findViewById(R.id.height)
+        val imc: TextView = findViewById(R.id.imc)
+        val rango: TextView = findViewById(R.id.range)
+        val calcular: Button = findViewById(R.id.calcular)
 
-                //Se obtiene el estado del usuario
-                val estado = this.obtenEstado(imcNum)
-                this.txtEstado.setText(estado)
 
-                //Se le añade el color dependiendo del resultado
-                when (estado) {
-                    "Bajo peso" -> this.txtEstado.setBackgroundResource(R.color.colorBrown)
-                    "Saludable" -> this.txtEstado.setBackgroundResource(R.color.colorGreen)
-                    "Sobrepeso" -> this.txtEstado.setBackgroundResource(R.color.colorGreenish)
-                    "Obesidad de grado 1" -> this.txtEstado.setBackgroundResource(R.color.colorYellow)
-                    "Obesidad de grado 2" -> this.txtEstado.setBackgroundResource(R.color.colorOrange)
-                    "Obesidad de grado 3" -> this.txtEstado.setBackgroundResource(R.color.colorRed)
+        calcular.setOnClickListener {
+            // Convertir los kilos y estatura a double.
+            var peso: Double = 0.0
+            var estatura: Double = 0.0
+
+            try{
+                peso = pesoK.text.toString().toDouble()
+                estatura = alturaE.text.toString().toDouble()
+
+
+            }catch (e: java.lang.Exception){
+                imc.setText("Debe ingresar valores reales")
+                println(e)
+
+            }
+
+            var resultado = calcularIMC(estatura,peso)
+            val formattedNumber = "%.2f".format(resultado)
+            imc.setText(formattedNumber)
+
+            var salud: String
+            var color: Int
+
+            when {
+                resultado < 18.5 -> {
+                    salud = "Bajo Peso"
+                    color = R.color.colorRed
+                }
+                resultado >= 18.5 && resultado <= 24.9 -> {
+                    salud = "Saludable"
+                    color = R.color.colorGreenish
+                }
+                resultado >= 25 && resultado <= 29.9 -> {
+                    salud = "Sobrepeso"
+                    color = R.color.colorYellow
+                }
+                resultado >= 30 && resultado <= 34.9 -> {
+                    salud = "Obesidad Grado 1"
+                    color = R.color.colorOrange
+                }
+                resultado >= 35 && resultado <= 39.9 -> {
+                    salud = "Obesidad Grado 2"
+                    color = R.color.colorBrown
+                }
+                resultado >= 40 -> {
+                    salud = "Obesidad Grado 3"
+                    color = R.color.colorRed
+                }
+                else -> {
+                    salud = "Error"
+                    color = 0
                 }
             }
-        }
 
-        /**
-         * Función encargada de calcular el imc en base la altura y peso del usuario
-         */
-        fun calculaIMC(altura: Double, peso: Double): Double {
-            val imc: Double = (peso / (Math.pow(altura, 2.0)))
-            return imc
-        }
+            rango.setBackgroundResource(color)
+            rango.setText(salud)
 
-        /**
-         * Función encargada de devolver el estado del usuario en base al imc
-         */
-        fun obtenEstado(imc: Double): String {
-            when {
-                imc < 18.5 -> return "Bajo peso"
-                imc >= 18.5 && imc <= 24.9 -> return "Saludable"
-                imc >= 24.9 && imc <= 29.9 -> return "Sobrepeso"
-                imc >= 29.9 && imc <= 34.9 -> return "Obesidad de grado 1"
-                imc >= 34.9 && imc <= 39.9 -> return "Obesidad de grado 2"
-                imc >= 40 -> return "Obesidad de grado 3"
-            }
-            return "error"
         }
     }
+
+    fun calcularIMC(heigth:Double, weigth: Double): Double{
+        return weigth / (heigth * heigth)
+    }
+
 }
